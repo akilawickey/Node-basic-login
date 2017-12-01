@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <title>EMCS</title>
+    <!-- Toggle -->
+    <link rel="stylesheet" href="css/toggle.css">
+    <script src="https://cdn.socket.io/socket.io-1.2.0.js"></script>
+    <script src="http://code.jquery.com/jquery-1.11.1.js"></script>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <!-- Bootstrap Core CSS -->
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <!-- MetisMenu CSS -->
+    <link href="css/metisMenu.min.css" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link href="css/sb-admin-2.css" rel="stylesheet">
+    <!-- Morris Charts CSS -->
+    <link href="css/morris.css" rel="stylesheet">
+    <!-- Custom Fonts -->
+    <link href="css/font-awesome.min.css" rel="stylesheet" type="text/css">
+    <script src="https://code.highcharts.com/highcharts.js"></script>
+    <script src="https://code.highcharts.com/highcharts-more.js"></script>
+    <script src="https://code.highcharts.com/modules/solid-gauge.js"></script>
+    <!-- Bootstrap Core JavaScript -->
+    <script src="js/bootstrap.min.js"></script>
+    <!-- Metis Menu Plugin JavaScript -->
+    <script src="js/metisMenu.min.js"></script>
+    <!-- Morris Charts JavaScript -->
+    <script src="js/raphael.min.js"></script>
+    <script src="js/morris.min.js"></script>
+    <script src="js/morris-data.js"></script>
+    <!-- Custom Theme JavaScript -->
+    <script src="js/sb-admin-2.js"></script>
+
+</head>
+<script type="text/javascript">
+     var part_one,part_two,graph_temp,graph_hum,graph_soil,graph_light;
+     var socket = io();
+     socket.on('mqtt', function(msg){
+        var res = msg.split(" ");
+        console.log(res);
+        part_one = res[0];
+        part_two = res[1];
+        if(part_one == "temp"){
+        graph_temp = part_two;
+        console.log(graph_temp);
+        }else if(part_one == "hum"){
+        graph_hum = part_two;
+        }else if(part_one == "soil"){
+        graph_soil = part_two;
+        }else if(part_one == "light"){
+        graph_light = part_two;   
+        }
+    });  
+    function pump1_control() {
+        if (document.querySelectorAll("input[id='switch7']:checked").length >= 1) {
+            socket.emit('publish', {topic:"testTopic",payload:"1"});
+        }else{
+            socket.emit('publish', {topic:"testTopic",payload:"0"});
+        }
+    }
+    function pump2_control() {
+        if (document.querySelectorAll("input[id='switch8']:checked").length >= 1) {
+            socket.emit('publish', {topic:"pump2",payload:"1"});
+        }else{
+            socket.emit('publish', {topic:"pump2",payload:"0"});
+        }    }
+    function fan1_control(elem) {
+        if (document.querySelectorAll("input[id='switch1']:checked").length >= 1) {
+            socket.emit('publish', {topic:"fan",payload:"1"});
+        }else{
+            socket.emit('publish', {topic:"fan",payload:"0"});
+        }     
+    }
+    function fan2_control() {
+         socket.emit('publish', {topic:"fan",payload:"0"});
+          if (document.querySelectorAll("input[id='switch2']:checked").length >= 1) {
+            socket.emit('publish', {topic:"fa2",payload:"1"});
+        }else{
+            socket.emit('publish', {topic:"fa2",payload:"0"});
+        }
+    }
+    function rule1_apply() {
+         socket.emit('rules', {topic:"fan",payload:"0"});
+    }
+</script>
+<body>
+    <div id="wrapper">
+        <!-- Navigation -->
+        <nav class="navbar navbar-default navbar-static-top" role="navigation" style="margin-bottom: 0">
+            <div class="navbar-header">
+                <a class="navbar-brand" href="index.html">EMCS Greenhouse</a>
+            </div>
+            <ul class="nav navbar-top-links navbar-right">  
+            </ul>
+            <div class="navbar-default sidebar" role="navigation">
+                <div class="sidebar-nav navbar-collapse">
+                    <ul class="nav" id="side-menu">
+                        <li class="sidebar-search">
+                            <div class="input-group custom-search-form">
+                                <input type="text" class="form-control" placeholder="Search...">
+                                <span class="input-group-btn">
+                                
+                            </span>
+                            </div>
+                            <!-- /input-group -->
+                        </li>
+                        <li>
+                            <a href="index.html">Dashboard</a>
+                        </li>
+                        <li>
+                            <a href="deploy.html">Deploy Rules</a>
+                        </li>
+                        <li>
+                            <a href="#"> Settings</a>
+                            <ul class="nav nav-second-level">
+                                <li>
+                                    <a href="config.html">Actuator Settings</a>
+                                </li>
+                                <li>
+                                    <a href="morris.html">Update</a>
+                                </li>
+                            </ul>
+                            <!-- /.nav-second-level -->
+                        </li>
+                        <li>
+                            <a href="training.html">Training Details</a>
+                        </li>
+                        <li>
+                            <a href="tables.html"></i>Help</a>
+                        </li>
+                        <li>
+                            <a href="forms.html">About Us</a>
+                        </li>
+                        <li>
+                            <a href="/profile">Account</a>
+                        </li>
+                        <li>
+                            <a href="/logout">Logout</a>
+                        </li>
+                        <li>
+                         
+                        </li>
+                    </ul>
+                </div>
+                <!-- /.sidebar-collapse -->
+            </div>
+        </nav>
+        <div id="page-wrapper">
+            <div class="row">
+                <div class="col-lg-12">
+                    <h1 class="page-header">Profile Management</h1>
+                </div>
+                <div class="col-lg-12">
+
+                        <div class="row">           
+                        <!-- LOCAL INFORMATION -->
+                        <div class="col-sm-6">
+                            <div class="well">
+                                <h3><span class="fa fa-user"></span> Local</h3>
+                
+                                <% if (user.local.email) { %>
+                                    <p>
+                                        <strong>id</strong>: <%= user._id %><br>
+                                        <strong>email</strong>: <%= user.local.email %><br>
+                                        <strong>password</strong>: <%= user.local.password %>
+                                    </p>
+                                    
+                                    <a href="/unlink/local" class="btn btn-default">Unlink</a>
+                                <% } else { %>
+                                    <a href="/connect/local" class="btn btn-default">Connect Local</a>
+                                <% } %>
+                
+                            </div>
+                        </div>
+                
+                        <!-- FACEBOOK INFORMATION -->
+                        <div class="col-sm-6">
+                            <div class="well">
+                                <h3 class="text-primary"><span class="fa fa-facebook"></span> Facebook</h3>
+                
+                                <!-- check if the user has this token (is the user authenticated with this social account) -->
+                                <% if (user.facebook.token) { %>
+                                    <p>
+                                        <strong>id</strong>: <%= user.facebook.id %><br>
+                                        <strong>token</strong>: <%= user.facebook.token %><br>
+                                        <strong>email</strong>: <%= user.facebook.email %><br>
+                                        <strong>name</strong>: <%= user.facebook.name %><br>
+                                    </p>
+                
+                                    <a href="/unlink/facebook" class="btn btn-primary">Unlink</a>
+                                <% } else { %>
+                                    <a href="/connect/facebook" class="btn btn-primary">Connect Facebook</a>
+                                <% } %>
+                
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                
+                        <!-- TWITTER INFORMATION -->
+                        <div class="col-sm-6">
+                            <div class="well">
+                                <h3 class="text-info"><span class="fa fa-twitter"></span> Twitter</h3>
+                
+                                <% if (user.twitter.token) { %>
+                                    <p>
+                                        <strong>id</strong>: <%= user.twitter.id %><br>
+                                        <strong>token</strong>: <%= user.twitter.token %><br>
+                                        <strong>display name</strong>: <%= user.twitter.displayName %><br>
+                                        <strong>username</strong>: <%= user.twitter.username %>
+                                    </p>
+                
+                                    <a href="/unlink/twitter" class="btn btn-info">Unlink</a>
+                                <% } else { %>
+                                    <a href="/connect/twitter" class="btn btn-info">Connect Twitter</a>
+                                <% } %>
+                
+                            </div>
+                        </div>
+                
+                        <!-- GOOGLE INFORMATION -->
+                        <div class="col-sm-6">
+                            <div class="well">
+                                <h3 class="text-danger"><span class="fa fa-google-plus"></span> Google+</h3>
+                
+                                <% if (user.google.token) { %>
+                                    <p>
+                                        <strong>id</strong>: <%= user.google.id %><br>
+                                        <strong>token</strong>: <%= user.google.token %><br>
+                                        <strong>email</strong>: <%= user.google.email %><br>
+                                        <strong>name</strong>: <%= user.google.name %>
+                                    </p>
+                
+                                    <a href="/unlink/google" class="btn btn-danger">Unlink</a>
+                                <% } else { %>
+                                    <a href="/connect/google" class="btn btn-danger">Connect Google</a>
+                                <% } %>
+                
+                            </div>
+                        </div>
+                    </div>
+                                
+                </div>
+
+        </div>
+    </div>
+</body>
+
+
+</html>
